@@ -13,7 +13,7 @@ function highlightActiveLink() {
 		}
 	});
 }
-
+// displaying popular movies
 async function displayPopularMovies() {
 	// ive destructured around results here because the returned data has something called results within it so im targetting that
 	const { results } = await fetchAPIData('movie/popular');
@@ -47,6 +47,135 @@ async function displayPopularMovies() {
 		document.getElementById('popular-movies').appendChild(newdiv);
 	});
 }
+// displaying popular tv shows
+async function displayPopularTVShows() {
+	// ive destructured around results here because the returned data has something called results within it so im targetting that
+	const { results } = await fetchAPIData('tv/popular');
+	console.log(results);
+	results.forEach((show) => {
+		const newdiv = document.createElement('div');
+		newdiv.classList.add('card');
+		newdiv.innerHTML = `
+          <a href="tv-details.html?id=${show.id}">
+       ${
+					show.poster_path
+						? `     <img
+              src="https://image.tmdb.org/t/p/w500${show.poster_path}"
+              class="card-img-top"
+              alt="${show.name}"
+            />`
+						: `     <img
+              src="images/no-image.jpg"
+              class="card-img-top"
+              alt="${show.name}"
+            />`
+				}
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">${show.name}</h5>
+            <p class="card-text">
+              <small class="text-muted">Aired: ${show.first_air_date}</small>
+            </p>
+          </div>
+      `;
+		document.getElementById('popular-shows').appendChild(newdiv);
+	});
+}
+
+// display movie details
+// displayaying the id through the search param which is the ?
+async function displayMovieDetails() {
+	// splitting the id here into two parts at the = or ?=(number) so it just returns num
+	const movieID = window.location.search.split('=')[1];
+	// getting the fetch data of the specific movie whos id were on in the page number id
+	const movie = await fetchAPIData(`movie/${movieID}`);
+	// overlay backdrop image
+	displayBackgroundImage('movie', movie.backdrop_path);
+
+	// making new div
+	const newDiv = document.createElement('div');
+	// set its html
+	newDiv.innerHTML = `
+        <div class="details-top">
+          <div>
+     ${
+				movie.poster_path
+					? `       <img
+              src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
+              class="card-img-top"
+              alt="Movie Title"
+            />`
+					: `       <img
+              src="images/no-image.jpg"
+              class="card-img-top"
+              alt="${movie.original_title}"
+            />`
+			}
+          </div>
+          <div>
+            <h2>${movie.original_title}</h2>
+            <p>
+              <i class="fas fa-star text-primary"></i>
+              ${movie.vote_average.toFixed(1)} / 10
+            </p>
+            <p class="text-muted">Release Date: ${movie.release_date}</p>
+            <p>
+          ${movie.overview}
+            </p>
+            <h5>Genres</h5>
+            <ul class="list-group">
+            ${movie.genres.map((genre) => `<li>${genre.name}</li>`).join(``)}
+            </ul>
+            <a href="${
+							movie.homepage ? `${movie.homepage}` : ''
+						}" target="_blank" class="btn">Visit Movie Homepage</a>
+          </div>
+        </div>
+        <div class="details-bottom">
+          <h2>Movie Info</h2>
+          <ul>
+            <li><span class="text-secondary">Budget:</span> $${addCommasToNumber(
+							movie.budget
+						)}</li>
+            <li><span class="text-secondary">Revenue:</span> $${addCommasToNumber(
+							movie.revenue
+						)}</li>
+            <li><span class="text-secondary">Runtime:</span> ${
+							movie.runtime
+						} minutes</li>
+            <li><span class="text-secondary">Status:</span> ${movie.status}</li>
+          </ul>
+          <h4>Production Companies</h4>
+          <div class="list-group">${movie.production_companies
+						.map((company) => `<span>${company.name}</span>`)
+						.join(', ')}</div>
+        </div>
+      `;
+	document.getElementById('movie-details').appendChild(newDiv);
+	console.log(movieID);
+}
+
+// create backdrop function
+function displayBackgroundImage(type, backgroundpath) {
+	const overlayDiv = document.createElement('div');
+	overlayDiv.style.backgroundImage = `url(https://image.tmdb.org/t/p/original${backgroundpath})`;
+	overlayDiv.style.backgroundSize = 'cover';
+	overlayDiv.style.backgroundPosition = 'center';
+	overlayDiv.style.backgroundRepeat = 'no-repeat';
+	overlayDiv.style.height = '100vh';
+	overlayDiv.style.width = '100vw';
+	overlayDiv.style.position = 'absolute';
+	overlayDiv.style.top = '0';
+	overlayDiv.style.left = '0';
+	overlayDiv.style.zIndex = '-1';
+	overlayDiv.style.opacity = '0.1';
+
+	if (type === 'movie') {
+		document.querySelector('#movie-details').appendChild(overlayDiv);
+	} else if (type === 'show') {
+		document.querySelector('#show-details').appendChild(overlayDiv);
+	}
+}
 
 // fetch data from TMDB API
 // making a reusable function for collecting the data from different endpoints in the api
@@ -54,14 +183,26 @@ async function displayPopularMovies() {
 async function fetchAPIData(endpoint) {
 	const API_KEY = 'c7d3e86e48b07c968a9eb9e0b8dbee83';
 	const API_URL = 'https://api.themoviedb.org/3/';
-
+	spinnerShow();
 	const response = await fetch(
 		`${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`
 	);
 	// parsing returned data with .json
 	// using async and await you must await till its compiled
 	const data = await response.json();
+	spinnerHide();
 	return data;
+}
+// showing or hiding the spinner
+function spinnerShow() {
+	document.querySelector('.spinner').classList.add('show');
+}
+function spinnerHide() {
+	document.querySelector('.spinner').classList.remove('show');
+}
+
+function addCommasToNumber(number) {
+	return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 // init app
@@ -73,9 +214,11 @@ function init() {
 			console.log('Home');
 			break;
 		case '/shows.html':
+			displayPopularTVShows();
 			console.log('Shows');
 			break;
 		case '/movie-details.html':
+			displayMovieDetails();
 			console.log('movie details');
 			break;
 		case '/tv-details.html':
