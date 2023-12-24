@@ -28,7 +28,7 @@ function highlightActiveLink() {
 async function displayPopularMovies() {
 	// ive destructured around results here because the returned data has something called results within it so im targetting that
 	const { results } = await fetchAPIData('movie/popular');
-	console.log(results);
+
 	results.forEach((movie) => {
 		const newdiv = document.createElement('div');
 		newdiv.classList.add('card');
@@ -145,11 +145,15 @@ async function displayMovieDetails() {
         <div class="details-bottom">
           <h2>Movie Info</h2>
           <ul>
-            <li><span class="text-secondary">Budget:</span> $${addCommasToNumber(
-							movie.budget
+            <li><span class="text-secondary">Budget:</span> ${addCommasToNumber(
+							movie.budget > 0
+								? '$' + addCommasToNumber(movie.budget)
+								: 'Unknown budget'
 						)}</li>
-            <li><span class="text-secondary">Revenue:</span> $${addCommasToNumber(
-							movie.revenue
+            <li><span class="text-secondary">Revenue:</span> ${addCommasToNumber(
+							movie.revenue > 0
+								? '$' + addCommasToNumber(movie.revenue)
+								: 'Unknown Revenue'
 						)}</li>
             <li><span class="text-secondary">Runtime:</span> ${
 							movie.runtime
@@ -198,7 +202,11 @@ async function displayShowDetails() {
             <h2>${show.name}</h2>
             <p>
               <i class="fas fa-star text-primary"></i>
-            ${show.vote_average.toFixed(1)}/ 10
+            ${
+							show.vote_average.toFixed(1) > 0
+								? show.vote_average.toFixed(1)
+								: 'no star'
+						}/ 10
             </p>
             <p class="text-muted">Last Air Date: ${show.last_air_date}</p>
             <p>
@@ -232,7 +240,6 @@ async function displayShowDetails() {
 						.join(', ')}</div>
         </div>`;
 	document.getElementById('show-details').appendChild(newDiv);
-	console.log(showID);
 }
 
 // searching movies/shows
@@ -394,11 +401,13 @@ function initSwiper() {
 		slidesPerView: 1,
 		spaceBetween: 30,
 		freeMode: true,
-		speed: 5000,
+		speed: 8000,
+
 		loop: true,
 		autoplay: {
-			delay: 1,
-			disableOnInteraction: false,
+			reverseDirection: false,
+			delay: 1000,
+			disableOnInteraction: true,
 			pauseOnMouseEnter: true,
 		},
 		breakpoints: {
@@ -468,27 +477,30 @@ function addCommasToNumber(number) {
 // init app
 function init() {
 	switch (global.currentPage) {
+		default:
+			displayPopularMovies();
+			break;
 		case '/':
 		case '/index.html':
 			displayPopularMovies();
 			displaySlider();
-			console.log('Home');
+
 			break;
 		case '/shows.html':
 			displayPopularTVShows();
-			console.log('Shows');
+
 			break;
 		case '/movie-details.html':
 			displayMovieDetails();
-			console.log('movie details');
+
 			break;
 		case '/tv-details.html':
 			displayShowDetails();
-			console.log('tv details');
+
 			break;
 		case '/search.html':
 			search();
-			console.log('search');
+
 			break;
 	}
 	highlightActiveLink();
