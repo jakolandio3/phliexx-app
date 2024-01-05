@@ -228,7 +228,12 @@ section h2 {
 	align-items: center;
 	margin: 50px 0 30px;
 }
-
+@media screen and (max-width: 600px) {
+	.details-top {
+		display: flex;
+		flex-direction: column;
+	}
+}
 .details-top img {
 	width: 400px;
 	height: 100%;
