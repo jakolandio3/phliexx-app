@@ -240,6 +240,11 @@ section h2 {
 	margin-right: 60px;
 	object-fit: cover;
 }
+@media screen and (max-width: 600px) {
+	.details-top img {
+		margin: 0px;
+	}
+}
 
 .details-top p {
 	margin: 20px 0;
