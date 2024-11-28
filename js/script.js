@@ -357,8 +357,8 @@ function showAlert(message, className) {
 
 // make request to search
 async function searchAPIData() {
-	const API_KEY = 'c7d3e86e48b07c968a9eb9e0b8dbee83';
-	const API_URL = 'https://api.themoviedb.org/3/';
+	const API_KEY = global.api.apiKey;
+	const API_URL = global.api.apiUrl;
 	spinnerShow();
 	const response = await fetch(
 		`${API_URL}search/${global.search.type}?api_key=${API_KEY}&language=en-US&query=${global.search.term}&page=${global.search.page}`
@@ -422,6 +422,7 @@ function initSwiper() {
 			},
 		},
 	});
+	return swiper;
 }
 
 // create backdrop function
@@ -450,8 +451,8 @@ function displayBackgroundImage(type, backgroundpath) {
 // making a reusable function for collecting the data from different endpoints in the api
 // contains the base url and my access key to prefill
 async function fetchAPIData(endpoint) {
-	const API_KEY = 'c7d3e86e48b07c968a9eb9e0b8dbee83';
-	const API_URL = 'https://api.themoviedb.org/3/';
+	const API_KEY = global.api.apiKey;
+	const API_URL = global.api.apiUrl;
 	spinnerShow();
 	const response = await fetch(
 		`${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`
